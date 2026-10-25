@@ -2,189 +2,116 @@
 //
 // Copyright (c) Сысоев А.В.
 //
+//
 
 #ifndef __TDynamicMatrix_H__
 #define __TDynamicMatrix_H__
 
 #include <iostream>
-#include <algorithm>
-#include <cassert>
-#include <stdexcept>
-#include <utility>
 
 const int MAX_VECTOR_SIZE = 100000000;
 const int MAX_MATRIX_SIZE = 10000;
 
-// Динамический вектор — шаблонный вектор на динамической памяти.
+// Динамический вектор - 
+// шаблонный вектор на динамической памяти
 template<typename T>
 class TDynamicVector
 {
 protected:
   size_t sz;
   T* pMem;
-
 public:
   TDynamicVector(size_t size = 1) : sz(size)
   {
     if (sz == 0)
       throw std::out_of_range("Vector size should be greater than zero");
-    if (sz > MAX_VECTOR_SIZE)
-      throw std::length_error("Vector size is too large");
-    pMem = new T[sz]();
+    pMem = new T[sz]();// {}; // У типа T д.б. констуктор по умолчанию
   }
-
-  TDynamicVector(T* arr, size_t s) : sz(s), pMem(nullptr)
+  TDynamicVector(T* arr, size_t s) : sz(s)
   {
-    if (sz == 0)
-      throw std::out_of_range("Vector size should be greater than zero");
-    if (sz > MAX_VECTOR_SIZE)
-      throw std::length_error("Vector size is too large");
-    if (arr == nullptr)
-      throw std::invalid_argument("Source array must not be null");
+    assert(arr != nullptr && "TDynamicVector ctor requires non-nullptr arg");
     pMem = new T[sz];
     std::copy(arr, arr + sz, pMem);
   }
-
   TDynamicVector(const TDynamicVector& v)
   {
-    sz = v.sz;
-    pMem = new T[sz];
-    if (sz != 0)
-      std::copy(v.pMem, v.pMem + sz, pMem);
   }
-
   TDynamicVector(TDynamicVector&& v) noexcept
   {
-    sz = v.sz;
-    pMem = v.pMem;
-    v.sz = 0;
-    v.pMem = nullptr;
   }
-
   ~TDynamicVector()
   {
-    delete[] pMem;
   }
-
   TDynamicVector& operator=(const TDynamicVector& v)
   {
-    if (this != &v)
-    {
-      TDynamicVector copy(v);
-      swap(*this, copy);
-    }
     return *this;
   }
-
   TDynamicVector& operator=(TDynamicVector&& v) noexcept
   {
-    if (this != &v)
-    {
-      delete[] pMem;
-      sz = v.sz;
-      pMem = v.pMem;
-      v.sz = 0;
-      v.pMem = nullptr;
-    }
     return *this;
   }
 
   size_t size() const noexcept { return sz; }
 
-  // Индексация с проверкой границ.
+  // индексация
   T& operator[](size_t ind)
   {
-    if (ind >= sz)
-      throw std::out_of_range("Vector index is out of range");
-    return pMem[ind];
+    throw "Not implemented";
+    return pMem[0];
   }
-
   const T& operator[](size_t ind) const
   {
-    if (ind >= sz)
-      throw std::out_of_range("Vector index is out of range");
-    return pMem[ind];
+    throw "Not implemented";
+    return pMem[0];
   }
-
-  // Индексация с контролем границ.
+  // индексация с контролем
   T& at(size_t ind)
   {
-    if (ind >= sz)
-      throw std::out_of_range("Vector index is out of range");
-    return pMem[ind];
+    throw "Not implemented";
+    return pMem[0];
   }
-
   const T& at(size_t ind) const
   {
-    if (ind >= sz)
-      throw std::out_of_range("Vector index is out of range");
-    return pMem[ind];
+    throw "Not implemented";
+    return pMem[0];
   }
 
+  // сравнение
   bool operator==(const TDynamicVector& v) const noexcept
   {
-    if (sz != v.sz)
-      return false;
-    for (size_t i = 0; i < sz; ++i)
-      if (pMem[i] != v.pMem[i])
-        return false;
-    return true;
+    return false;
   }
-
   bool operator!=(const TDynamicVector& v) const noexcept
   {
-    return !(*this == v);
+    return false;
   }
 
-  TDynamicVector operator+(T val) const
+  // скалярные операции
+  TDynamicVector operator+(T val)
   {
-    TDynamicVector result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] + val;
-    return result;
+    return TDynamicVector{};
+  }
+  TDynamicVector operator-(double val)
+  {
+    return TDynamicVector{};
+  }
+  TDynamicVector operator*(double val)
+  {
+    return TDynamicVector{};
   }
 
-  TDynamicVector operator-(double val) const
+  // векторные операции
+  TDynamicVector operator+(const TDynamicVector& v)
   {
-    TDynamicVector result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] - val;
-    return result;
+    return TDynamicVector{};
   }
-
-  TDynamicVector operator*(double val) const
+  TDynamicVector operator-(const TDynamicVector& v)
   {
-    TDynamicVector result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] * val;
-    return result;
+    return TDynamicVector{};
   }
-
-  TDynamicVector operator+(const TDynamicVector& v) const
+  T operator*(const TDynamicVector& v) //noexcept(noexcept(T()))
   {
-    checkSameSize(v);
-    TDynamicVector result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] + v.pMem[i];
-    return result;
-  }
-
-  TDynamicVector operator-(const TDynamicVector& v) const
-  {
-    checkSameSize(v);
-    TDynamicVector result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] - v.pMem[i];
-    return result;
-  }
-
-  T operator*(const TDynamicVector& v) const
-  {
-    checkSameSize(v);
-    T result{};
-    for (size_t i = 0; i < sz; ++i)
-      result += pMem[i] * v.pMem[i];
-    return result;
+    return T{};
   }
 
   friend void swap(TDynamicVector& lhs, TDynamicVector& rhs) noexcept
@@ -193,142 +120,79 @@ public:
     std::swap(lhs.pMem, rhs.pMem);
   }
 
+  // ввод/вывод
   friend std::istream& operator>>(std::istream& istr, TDynamicVector& v)
   {
-    for (size_t i = 0; i < v.sz; ++i)
-      istr >> v.pMem[i];
+    for (size_t i = 0; i < v.sz; i++)
+      istr >> v.pMem[i]; // требуется оператор>> для типа T
     return istr;
   }
-
   friend std::ostream& operator<<(std::ostream& ostr, const TDynamicVector& v)
   {
-    for (size_t i = 0; i < v.sz; ++i)
-      ostr << v.pMem[i] << ' ';
+    for (size_t i = 0; i < v.sz; i++)
+      ostr << v.pMem[i] << ' '; // требуется оператор<< для типа T
     return ostr;
-  }
-
-private:
-  void checkSameSize(const TDynamicVector& v) const
-  {
-    if (sz != v.sz)
-      throw std::invalid_argument("Vector sizes must match");
   }
 };
 
-// Квадратная матрица хранится как вектор строк.
+
+// Динамическая матрица - 
+// шаблонная матрица на динамической памяти
 template<typename T>
 class TDynamicMatrix : private TDynamicVector<TDynamicVector<T>>
 {
   using TDynamicVector<TDynamicVector<T>>::pMem;
   using TDynamicVector<TDynamicVector<T>>::sz;
-
 public:
-  TDynamicMatrix(size_t s = 1) : TDynamicVector<TDynamicVector<T>>(checkedSize(s))
+  TDynamicMatrix(size_t s = 1) : TDynamicVector<TDynamicVector<T>>(s)
   {
-    for (size_t i = 0; i < sz; ++i)
+    for (size_t i = 0; i < sz; i++)
       pMem[i] = TDynamicVector<T>(sz);
   }
 
   using TDynamicVector<TDynamicVector<T>>::operator[];
-  using TDynamicVector<TDynamicVector<T>>::size;
 
+  // сравнение
   bool operator==(const TDynamicMatrix& m) const noexcept
   {
-    if (sz != m.sz)
-      return false;
-    for (size_t i = 0; i < sz; ++i)
-      if (pMem[i] != m.pMem[i])
-        return false;
-    return true;
+    return false;
   }
 
-  bool operator!=(const TDynamicMatrix& m) const noexcept
+  // матрично-скалярные операции
+  TDynamicMatrix<T> operator*(const T& val)
   {
-    return !(*this == m);
+    return TDynamicMatrix<T>{};
   }
 
-  TDynamicMatrix<T> operator*(const T& val) const
+  // матрично-векторные операции
+  TDynamicVector<T> operator*(const TDynamicVector<T>& v)
   {
-    TDynamicMatrix<T> result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      for (size_t j = 0; j < sz; ++j)
-        result[i][j] = pMem[i][j] * val;
-    return result;
+    return TDynamicVector<T>{};
   }
 
-  TDynamicVector<T> operator*(const TDynamicVector<T>& v) const
+  // матрично-матричные операции
+  TDynamicMatrix operator+(const TDynamicMatrix& m)
   {
-    if (v.size() != sz)
-      throw std::invalid_argument("Matrix and vector sizes must match");
-    TDynamicVector<T> result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] * v;
-    return result;
+    // можно ли написать реализацию, используя operator+ вектора?
+    return TDynamicMatrix<T>{};
+  }
+  TDynamicMatrix operator-(const TDynamicMatrix& m)
+  {
+    return TDynamicMatrix<T>{};
+  }
+  TDynamicMatrix operator*(const TDynamicMatrix& m)
+  {
+    return TDynamicMatrix<T>{};
   }
 
-  TDynamicMatrix operator+(const TDynamicMatrix& m) const
+  // ввод/вывод
+  friend std::istream& operator>>(std::istream& istr, TDynamicMatrix& v)
   {
-    checkSameSize(m);
-    TDynamicMatrix result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] + m.pMem[i];
-    return result;
-  }
-
-  TDynamicMatrix operator-(const TDynamicMatrix& m) const
-  {
-    checkSameSize(m);
-    TDynamicMatrix result(sz);
-    for (size_t i = 0; i < sz; ++i)
-      result[i] = pMem[i] - m.pMem[i];
-    return result;
-  }
-
-  TDynamicMatrix operator*(const TDynamicMatrix& m) const
-  {
-    checkSameSize(m);
-    TDynamicMatrix result(sz);
-    for (size_t i = 0; i < sz; ++i)
-    {
-      for (size_t j = 0; j < sz; ++j)
-      {
-        T sum{};
-        for (size_t k = 0; k < sz; ++k)
-          sum += pMem[i][k] * m.pMem[k][j];
-        result[i][j] = sum;
-      }
-    }
-    return result;
-  }
-
-  friend std::istream& operator>>(std::istream& istr, TDynamicMatrix& m)
-  {
-    for (size_t i = 0; i < m.sz; ++i)
-      istr >> m.pMem[i];
     return istr;
   }
-
-  friend std::ostream& operator<<(std::ostream& ostr, const TDynamicMatrix& m)
+  friend std::ostream& operator<<(std::ostream& ostr, const TDynamicMatrix& v)
   {
-    for (size_t i = 0; i < m.sz; ++i)
-      ostr << m.pMem[i] << '\n';
     return ostr;
-  }
-
-private:
-  static size_t checkedSize(size_t size)
-  {
-    if (size == 0)
-      throw std::out_of_range("Matrix size should be greater than zero");
-    if (size > MAX_MATRIX_SIZE)
-      throw std::length_error("Matrix size is too large");
-    return size;
-  }
-
-  void checkSameSize(const TDynamicMatrix& m) const
-  {
-    if (sz != m.sz)
-      throw std::invalid_argument("Matrix sizes must match");
   }
 };
 
